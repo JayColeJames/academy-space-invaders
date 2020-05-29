@@ -4,6 +4,55 @@ div#background {
     background-image: url('assets/background.png');
     position: absolute;
 }
+div#edge-left{
+    position: absolute;
+    top:0px;
+    left:0px;
+    min-width: 100px;
+    min-height: 799px;
+    background-color: gray;
+    opacity: .2;
+    z-index: 1000;
+}
+div#edge-right{
+    position: absolute;
+    top:0px;
+    right:0px;
+    min-width: 100px;
+    min-height: 799px;
+    background-color: gray;
+    opacity: .2;
+    z-index: 1000;
+}
+div#lives{
+    position: absolute;
+    top:10px;
+    left:100px;
+    color:white;
+    color: white;
+    font-size: xx-large;
+}
+div#speed{
+    position: absolute;
+    top:10px;
+    left:750px;
+    color: white;
+    font-size: xx-large;
+}
+div#level{
+    position: absolute;
+    top:10px;
+    left:500px;
+    color: white;
+    font-size: xx-large;
+}
+div#score{
+    position: absolute;
+    top:10px;
+    left:1000px;
+    color: white;
+    font-size: xx-large;
+}
 
 div#hero {
     width: 50px;
@@ -11,7 +60,7 @@ div#hero {
     background-image: url('assets/hero.png');
     position: absolute;
     left: 575px;
-    top: 700px; 
+    top: 700px;
 }
 
 div#missiles {

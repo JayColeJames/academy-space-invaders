@@ -3,6 +3,7 @@
 <head>
     <title>Space Invaders</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <!--
@@ -18,55 +19,124 @@
         10. collision detection
     -->
     <div id="background">
+        <div id="score">Score <span>0</span></div>
+        <div id="lives">Lives <span>3</span></div>
+        <div id="speed">LoopSpeed <span>500</span></div>
+        <div id="level">Level <span>1</span></div>
         <div id="hero"></div>
         <div id="missiles"></div>
         <div id="enemies"></div>
+        <div id="edge-left"></div>
+        <div id="edge-right"></div>
     </div>
 
     <script>
-        var hero = {
-            left: 575,
-            top: 700
-        };
+        var hero, missiles, dir, loopSpeed, missleSpeed, gameTimer, missileTimer
+        var screenWidth = $("#background").width();
+        var screenHeight = $("#background").height();
+        var score = 0;
+        var lives = 3;
+        var level = 0;
 
-        var missiles = [];
-
-        var enemies = [
-            { left: 200, top: 100 },
-            { left: 300, top: 100 },
-            { left: 400, top: 100 },
-            { left: 500, top: 100 },
-            { left: 600, top: 100 },
-            { left: 700, top: 100 },
-            { left: 800, top: 100 },
-            { left: 900, top: 100 },
-            { left: 200, top: 175 },
-            { left: 300, top: 175 },
-            { left: 400, top: 175 },
-            { left: 500, top: 175 },
-            { left: 600, top: 175 },
-            { left: 700, top: 175 },
-            { left: 800, top: 175 },
-            { left: 900, top: 175 }
-        ];
-        
-
+        function initGame(){
+            ++ level;
+            hero = {
+                left: 575,
+                top: 700
+            };
+            missiles = [];
+            enemies = [
+                { left: 200, top: 100 },
+                { left: 250, top: 100 },
+                { left: 300, top: 100 },
+                { left: 350, top: 100 },
+                { left: 400, top: 100 },
+                { left: 450, top: 100 },
+                { left: 500, top: 100 },
+                { left: 550, top: 100 },
+                { left: 600, top: 100 },
+                { left: 650, top: 100 },
+                { left: 700, top: 100 },
+                { left: 750, top: 100 },
+                { left: 800, top: 100 },
+                { left: 850, top: 100 },
+                { left: 900, top: 100 },
+                { left: 200, top: 175},
+                { left: 250, top: 175},
+                { left: 300, top: 175},
+                { left: 350, top: 175},
+                { left: 400, top: 175},
+                { left: 450, top: 175},
+                { left: 500, top: 175},
+                { left: 550, top: 175},
+                { left: 600, top: 175},
+                { left: 650, top: 175},
+                { left: 700, top: 175},
+                { left: 750, top: 175},
+                { left: 800, top: 175},
+                { left: 850, top: 175},
+                { left: 900, top: 175},
+                { left: 200, top: 250 },
+                { left: 300, top: 250 },
+                { left: 400, top: 250 },
+                { left: 500, top: 250 },
+                { left: 600, top: 250 },
+                { left: 700, top: 250 },
+                { left: 800, top: 250 },
+                { left: 900, top: 250 },
+                { left: 200, top: 325 },
+                { left: 250, top: 325 },
+                { left: 300, top: 325 },
+                { left: 350, top: 325 },
+                { left: 400, top: 325 },
+                { left: 450, top: 325 },
+                { left: 500, top: 325 },
+                { left: 550, top: 325 },
+                { left: 600, top: 325 },
+                { left: 650, top: 325 },
+                { left: 700, top: 325 },
+                { left: 750, top: 325 },
+                { left: 800, top: 325 },
+                { left: 850, top: 325 },
+                { left: 900, top: 325 },
+            ];
+            dir = 1;
+            loopSpeed = Math.max(1000 - (level*100),0);
+            missleSpeed = 5;
+            shots = 5;
+            clearTimeout(gameTimer);
+            clearTimeout(missileTimer);
+            $("#speed span").text(loopSpeed);
+            document.getElementById('missiles').innerHTML = ""
+            document.getElementById('enemies').innerHTML = ""
+            $("#level span").text(level);
+            drawEnemies();
+            gameLoop();
+            missleLoop();
+            return;
+        }
         document.onkeydown = function(e) {
             if (e.keyCode === 37) {
                 // Left
                 hero.left = hero.left - 10;
+                ret = checkEdge(hero.left, -1);
+                if(ret.edge) hero.left = 100;
             }
             if (e.keyCode === 39) {
                 // Right
                 hero.left = hero.left + 10;
+                ret = checkEdge(hero.left, 1);
+                if(ret.edge) hero.left = screenWidth - 150;
             }
             if (e.keyCode === 32) {
                 // Spacebar (fire)
-                missiles.push({
-                    left: hero.left + 20,
-                    top: hero.top - 20 
-                });
-                drawMissiles()
+                if(missiles.length < shots){
+                    missiles.push({
+                        left: hero.left + 20,
+                        top: hero.top - 20
+                    });
+                    drawMissiles();
+                }
             }
             drawHero();
         }
@@ -79,57 +149,134 @@
 
         function drawMissiles() {
             document.getElementById('missiles').innerHTML = ""
-            for(var i = 0 ; i < missiles.length ; i++ ) {
+            for(var i = 0; i < missiles.length; i++ ) {
                 document.getElementById('missiles').innerHTML += `<div class='missile1' style='left:${missiles[i].left}px; top:${missiles[i].top}px'></div>`;
             }
         }
 
         function moveMissiles() {
             for(var i = 0 ; i < missiles.length ; i++ ) {
-                missiles[i].top = missiles[i].top - 8
+                missiles[i].top = missiles[i].top - 1
+                if(missiles[i].top <100){
+                    missiles.splice(i, 1);
+                }
             }
         }
 
         function drawEnemies() {
+            //console.log("draw Enemies");
             document.getElementById('enemies').innerHTML = ""
             for(var i = 0 ; i < enemies.length ; i++ ) {
                 document.getElementById('enemies').innerHTML += `<div class='enemy' style='left:${enemies[i].left}px; top:${enemies[i].top}px'></div>`;
             }
         }
-
-        function moveEnemies() {
+        function moveEnemiesDown() {
+            //console.log("move Down");
+            var enemyDivs = $('.enemy');
             for(var i = 0 ; i < enemies.length ; i++ ) {
-                enemies[i].top = enemies[i].top + 1;
+                if(enemies[i].top + 50 < screenHeight){
+                    enemies[i].top = enemies[i].top + 50;
+                     $(enemyDivs[i]).css('left',enemies[i].left );
+                     $(enemyDivs[i]).css('top',enemies[i].top );
+                }else{
+                    -- lives;
+                    -- level;
+                    $("#lives span").text(lives);
+                    setTimeout(initGame,1000);
+                }
+            }
+            //drawEnemies();
+        }
+        function moveEnemiesHorz() {
+            var down = false;
+            var enemyDivs = $('.enemy');
+            for(var i = 0 ; i < enemies.length ; i++ ) {
+                enemies[i].left = enemies[i].left + dir;
+                ret = checkEdge(enemies[i].left, dir);
+                if(ret.edge) down = true;
+                dir = ret.dir;
+                $(enemyDivs[i]).css('left',enemies[i].left );
+                $(enemyDivs[i]).css('top',enemies[i].top );
+            }
+            if(down){
+                moveEnemiesDown()
             }
         }
 
+
+        function checkEdge(loc, dr){
+            var res = {edge: false, dir:dr};
+            if(dr > 0 ){
+                if(loc+150 >= screenWidth){
+                    res.dir = -1;
+                    res.edge =true;
+                }
+            }else{
+                if(loc <= 100 ){
+                    res.dir = 1;
+                    res.edge =true;
+                }
+            }
+            return res;
+        }
         function collisionDetection() {
-            for (var enemy = 0; enemy < enemies.length; enemy++) {
-                for (var missile = 0; missile < missiles.length; missile++) {
-                    if ( 
-                        missiles[missile].left >= enemies[enemy].left  &&
-                        missiles[missile].left <= (enemies[enemy].left + 50)  &&
-                        missiles[missile].top <= (enemies[enemy].top + 50)  &&
-                        missiles[missile].top >= enemies[enemy].top
-                    ) {
-                        enemies.splice(enemy, 1);
-                        missiles.splice(missile, 1);
+            var enemyDivs = $('.enemy');
+            if(enemyDivs.length > 0){
+                for (var enemy = 0; enemy < enemies.length; enemy++) {
+                    if(typeof enemies[enemy].left != "undefined"){
+                        for (var missile = 0; missile < missiles.length; missile++) {
+                            if(typeof missiles[missile] != "undefined"){
+                                if (missiles[missile].left >= enemies[enemy].left  &&
+                                    missiles[missile].left <= (enemies[enemy].left + 50)  &&
+                                    missiles[missile].top <= (enemies[enemy].top + 50)  &&
+                                    missiles[missile].top >= enemies[enemy].top
+                                ) {
+
+                                    var ec= enemyDivs.length -1;
+                                    enemyDivs[enemy].remove();
+                                    enemies.splice(enemy, 1);
+                                    missiles.splice(missile, 1);
+                                    loopSpeed = Math.max(loopSpeed - (ec/2), 0);
+                                    score += 100;
+                                    $("#score span").text(score);
+                                    $("#speed span").text(loopSpeed);
+                                    enemyDivs = $('.enemy');
+                                    if(ec <= 0) setTimeout(initGame,1000);
+                                }
+                            }
+                        }
+                        if (hero.left >= enemies[enemy].left  &&
+                            hero.left <= (enemies[enemy].left + 50)  &&
+                            hero.top  <= (enemies[enemy].top + 50)  &&
+                            hero.top  >= enemies[enemy].top
+                        ) {
+                            lives = lives - 1;
+                            level = level -1;
+                            $("#lives span").text(lives);
+                             setTimeout(initGame,1000);
+                        }
                     }
                 }
             }
         }
 
         function gameLoop() {
-            setTimeout(gameLoop, 1000)
-            moveMissiles();
-            drawMissiles();
-            moveEnemies();
-            drawEnemies();
-            collisionDetection();
+            var enemyDivs = $('.enemy');
+            if(enemyDivs.length > 0){
+               gameTimer = setTimeout(gameLoop, loopSpeed)
+                moveEnemiesHorz();
+                collisionDetection();
+            }
         }
-        
-        gameLoop()
-
+        function missleLoop(){
+            missileTimer = setTimeout(missleLoop, missleSpeed);
+            if(missiles.length >0){
+                moveMissiles();
+                drawMissiles();
+            }
+        }
+        //main start
+        initGame();
     </script>
 </body>
 </html>
