@@ -31,7 +31,7 @@
     </div>
 
     <script>
-        var hero, missiles, dir, loopSpeed, missleSpeed, gameTimer, missileTimer
+        var hero, missiles, dir = 1, loopSpeed, missleSpeed, gameTimer, missileTimer, ship, shipTimer, dirShip = 1, shipSpeed =5;
         var screenWidth = $("#background").width();
         var screenHeight = $("#background").height();
         var score = 0;
@@ -113,6 +113,9 @@
             drawEnemies();
             gameLoop();
             missleLoop();
+            clearTimeout(shipTimer);
+            var rnd = Math.floor(Math.random() * 10) * 10000;
+            shipTimer = setTimeout(shipLoop, rnd);
             return;
         }
         document.onkeydown = function(e) {
@@ -171,10 +174,9 @@
             }
         }
         function moveEnemiesDown() {
-            //console.log("move Down");
             var enemyDivs = $('.enemy');
             for(var i = 0 ; i < enemies.length ; i++ ) {
-                if(enemies[i].top + 50 < screenHeight){
+                if(enemies[i].top + 150 < screenHeight){
                     enemies[i].top = enemies[i].top + 50;
                      $(enemyDivs[i]).css('left',enemies[i].left );
                      $(enemyDivs[i]).css('top',enemies[i].top );
@@ -185,7 +187,6 @@
                     setTimeout(initGame,1000);
                 }
             }
-            //drawEnemies();
         }
         function moveEnemiesHorz() {
             var down = false;
@@ -196,13 +197,38 @@
                 if(ret.edge) down = true;
                 dir = ret.dir;
                 $(enemyDivs[i]).css('left',enemies[i].left );
-                $(enemyDivs[i]).css('top',enemies[i].top );
             }
             if(down){
                 moveEnemiesDown()
             }
         }
+        function drawShip() {
+            if($('.ship').length == 0){ //only one ship at a time
+                var left = 1149;
+                var top = 50;
+                if(dir == 1) left=10;
+                dirShip = dir;
+                $('#enemies').prepend(`<div id="ship" class='ship' style='left:${left}px; top:${top}px'></div>`);
+                ship =$('#ship');//.offset({"top": top, "left": left});
+                shipSpeed = Math.floor(Math.random() * 10) * 1;
+            }
 
+        }
+        function moveShip() {
+            //ship = $('#ship');
+            if(ship.length != 0){
+                var pos = ship.offset();
+                pos.left += dirShip;
+                ship.offset(pos);
+                ret = checkEdge(pos.left, dirShip);
+                if(ret.edge){
+                    ship.remove();
+                    clearTimeout(shipTimer);
+                    var rnd = Math.floor(Math.random() * 10) * 20000;
+                    shipTimer = setTimeout(shipLoop, rnd);
+                }
+            }
+        }
 
         function checkEdge(loc, dr){
             var res = {edge: false, dir:dr};
@@ -221,6 +247,7 @@
         }
         function collisionDetection() {
             var enemyDivs = $('.enemy');
+            if(ship) var shipPos = ship.offset();
             if(enemyDivs.length > 0){
                 for (var enemy = 0; enemy < enemies.length; enemy++) {
                     if(typeof enemies[enemy].left != "undefined"){
@@ -242,6 +269,17 @@
                                     $("#speed span").text(loopSpeed);
                                     enemyDivs = $('.enemy');
                                     if(ec <= 0) setTimeout(initGame,1000);
+                                }else if(ship && missiles[missile].left >= shipPos.left  &&
+                                    missiles[missile].left <= (shipPos.left + 100)  &&
+                                    missiles[missile].top <=  (shipPos.top + 50)  &&
+                                    missiles[missile].top >= shipPos.top
+                                ) {
+                                    clearTimeout(shipTimer);
+                                    var rnd = Math.floor(Math.random() * 10) * 10000;
+                                    shipTimer = setTimeout(shipLoop, rnd);
+                                    ship.remove();
+                                    score += 1000;
+                                    $("#score span").text(score);
                                 }
                             }
                         }
@@ -267,13 +305,25 @@
                 moveEnemiesHorz();
                 collisionDetection();
             }
+
         }
+
         function missleLoop(){
             missileTimer = setTimeout(missleLoop, missleSpeed);
             if(missiles.length >0){
                 moveMissiles();
                 drawMissiles();
             }
+        }
+
+        function shipLoop(){
+            console.log("shipLoop");
+            drawShip();
+            function movesShip(){
+                moveShip();
+                shipMoveTimer = setTimeout(movesShip, shipSpeed);
+            }
+            movesShip();
         }
         //main start
         initGame();

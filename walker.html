@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Space Invaders</title>
+        <link rel="stylesheet" href="style_walker.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+
+    <body>
+        <div id="demo">
+            <p>position <span id="pos" >0</span></p>
+            <p id="image" onmouseover="animateScript2()"> </p>
+        </div>
+        <div id="editor" class="editor row">
+            <div class="column">
+                <span>
+                    <label for="tag-name">Tag</label>
+                    <input id="tag-name" type="text" name="tag-name" value="">
+                </span>
+                <p>
+                    <label for="step">Step</label>
+                    <input id="step" type="text" name="step" value="">
+                </p>
+                <p>position <span id="edtrPos">0,0</span></p>
+                <p>JSON Data</p>
+                <pre id="json-data" contenteditable="true"></pre>
+            </div>
+            <p id="imgEdtr"></p>
+        </div>
+        <p id="imgAm"></p>
+
+    </body>
+    <script type="text/javascript">
+
+        var  tID; // variable to clear the setInterval()
+        function animateScript() {
+            var    position = 256; //start position image slicer
+            const  interval = 300; //600 ms of interval
+            var    frame = 0, offset = 0;
+            var    demo = document.getElementById("demo");
+            var    img = document.getElementById("image");
+            tID = setInterval ( () => {
+
+            img.style.backgroundPosition =`-${position}px 0px`;
+            img.style.left = `${offset}px`;
+            ++ frame
+            document.getElementById("pos").innerHTML = position+ " frame "+ frame + " offset "+ offset +" "+ demo.width;
+            if(offset > demo.width) offset = -10;
+            if (position < 1536) {
+            position = position + 230;
+             offset += 10;
+            } //we increment the position by 230 each time
+            else {
+              position = 265; //reset to 265px, once position exceeds 1536px
+              frame = 0
+              offset += 20;
+            }
+           }
+        , interval );
+        }
+        var editor  = document.getElementById("imgEdtr");
+        var jsonPre = document.getElementById("json-data");
+        var imgAm   = document.getElementById("imgAm");
+        var steps   = document.getElementById("step").value;
+        var step    = 50;
+        var lft = 0, tp = 0;
+        var hstep = 234;
+        var frame = 0;
+        var max = 1;
+        var poslft = 0;
+
+            document.onkeydown = function(e) {
+
+            console.log(e.keyCode, steps);
+            switch (e.keyCode) {
+                case 37:
+                    lft -= hstep;
+                    ++ frame;
+                    poslft -= step;
+                    break;
+                case 39:
+                    lft += hstep;
+                    ++ frame;
+                    poslft += step;
+                    break;
+                case 38:
+                    -- tp;
+                    ++ frame;
+                    break;
+                case 40:
+                    ++ tp;
+                    ++ frame;
+                    break;
+                default:
+
+            }
+            max = Math.max(frame,max)
+            if(lft > 1638) lft = 0; frame = 0;
+            if(lft < 0 ) lft = 1638; frame = max
+            var json = {
+                top:   tp,
+                left:  lft,
+                frame: frame,
+                tag: document.getElementById("tag-name").value
+            }
+            console.log(poslft);
+            editor.style.backgroundPosition =`${lft}px ${tp}px`;
+            imgAm.style.backgroundPosition =`${lft}px ${tp}px`;
+            imgAm.style.left = `${poslft}px`;
+            document.getElementById("edtrPos").innerHTML =`${lft}px ${tp}px`
+            document.getElementById("json-data").innerHTML = JSON.stringify(json,null,4);
+        }
+
+    </script>
+</html>
