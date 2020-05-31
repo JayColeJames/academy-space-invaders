@@ -7,12 +7,16 @@
 }
 #demo {
   width: 100%;
-  height: 100%;
+  height: 25%;
   overflow: hidden;
 }
 #editor {
     display: flex;
     flex-direction: row;
+    border: solid 1px;
+    margin: 5px;
+    padding: 10px;
+    height: 40%;
 }
 #imgEdtr{
     height: 256px;
@@ -20,7 +24,6 @@
     background: url(https://miro.medium.com/max/1400/1*WhDjw8GiV5o0flBXM4LXEw.png) 0px 0px;
     position: relative;
     left: 0;
-
 }
 #imgAm{
     height: 256px;
@@ -29,10 +32,38 @@
     position: relative;
     left: 300;
 }
-pre {
+#json-frame {
     width: inherit;
     height: 150px;
     background-color: black;
     color: white;
     border: solid 1px gray;
+}
+#json-clip{
+    min-width: 250px;
+    min-height: 80%;
+    overflow:scroll;
+    background-color: black;
+    color: white;
+    border: solid 1px gray;
+    overflow-x: hidden;
+}
+.xy-box{
+    width: 40px;
+    margin-left: 5px;
+}
+
+#tag-name{
+    margin-left: 5px;
+    width: 150px;
+
+}
+label { margin-left:  5px;}
+.animator{
+    background-color: cornsilk;
+}
+.preview-clip{
+    width: 100%;
+    height: 30%;
+    overflow: hidden;
 }

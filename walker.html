@@ -7,108 +7,139 @@
     </head>
 
     <body>
-        <div id="demo">
-            <p>position <span id="pos" >0</span></p>
+        <!-- <div id="demo" class="animator">
             <p id="image" onmouseover="animateScript2()"> </p>
-        </div>
-        <div id="editor" class="editor row">
+        </div> -->
+        <div id="editor" class="editor row animator">
             <div class="column">
-                <span>
-                    <label for="tag-name">Tag</label>
+                    <label for="tag-name">Clip Name</label><br>
                     <input id="tag-name" type="text" name="tag-name" value="">
-                </span>
+
+                <p> image-background position</p>
                 <p>
-                    <label for="step">Step</label>
-                    <input id="step" type="text" name="step" value="">
+                    <label for="pos-x">X</label>
+                    <input class="xy-box" id="pos-X" type="number" name="pos-x" value="0">
+
+                    <label for="pos-y">Y</label>
+                    <input class="xy-box" id="pos-y" type="number" name="pos-y" value="0">
                 </p>
-                <p>position <span id="edtrPos">0,0</span></p>
-                <p>JSON Data</p>
-                <pre id="json-data" contenteditable="true"></pre>
+                <hr>
+                <p>Move Direction</p>
+                <p>
+                    <label for="horzStep">Horz. Step</label>
+                    <input id="horzStep" type="number" name="horzStep" class="xy-box" value="50">
+                    <label for="vertStep">Vert. Step</label>
+                    <input id="vertStep" type="number" name="vertStep" class="xy-box" value="0">
+                </p>
+                <hr>
+                <p>
+                    Frame Data
+                    <label for="frame"> #</label>
+                    <input id="frame" type="number" name="frame" class="xy-box" value="0">
+                </p>
+                <pre id="json-frame" contenteditable="true"></pre>
+                <button type="button" name="add-btn" onclick="addFrame()">Add</button>
             </div>
-            <p id="imgEdtr"></p>
+            <div class="column animator">
+                <p style="margin-left: 20px;">position <span id="edtrPos">0,0</span></p>
+                <p id="imgEdtr"></p>
+            </div>
+            <div class="column">
+                <p>Clip Data</p>
+                <pre id="json-clip" contenteditable="true"></pre>
+                <button type="button" name="run-btn" onclick="runClip()">Run</button>
+            </div>
         </div>
-        <p id="imgAm"></p>
+        <div class="animator preview-clip">
+            <p id="imgAm"></p>
+        </div>
 
     </body>
     <script type="text/javascript">
 
         var  tID; // variable to clear the setInterval()
+        var start = true;
         function animateScript() {
             var    position = 256; //start position image slicer
             const  interval = 300; //600 ms of interval
             var    frame = 0, offset = 0;
             var    demo = document.getElementById("demo");
             var    img = document.getElementById("image");
-            tID = setInterval ( () => {
-
-            img.style.backgroundPosition =`-${position}px 0px`;
-            img.style.left = `${offset}px`;
-            ++ frame
-            document.getElementById("pos").innerHTML = position+ " frame "+ frame + " offset "+ offset +" "+ demo.width;
-            if(offset > demo.width) offset = -10;
-            if (position < 1536) {
-            position = position + 230;
-             offset += 10;
-            } //we increment the position by 230 each time
-            else {
-              position = 265; //reset to 265px, once position exceeds 1536px
-              frame = 0
-              offset += 20;
+            if (start){
+                start = false;
+                tID = setInterval ( () => {
+                    img.style.backgroundPosition =`-${position}px 0px`;
+                    img.style.left = `${offset}px`;
+                    ++ frame
+                    document.getElementById("pos").innerHTML = position+ " frame "+ frame + " offset "+ offset +" "+ demo.width;
+                    if(offset > demo.width) offset = -10;
+                    if (position < 1536) {
+                        position = position + 230;
+                        offset += 10;
+                        if(offset  > 1600)offset = 0;
+                    } //we increment the position by 230 each time
+                    else {
+                        position = 265; //reset to 265px, once position exceeds 1536px
+                        frame = 0
+                        offset += 20;
+                    }
+                }
+                , interval );
             }
-           }
-        , interval );
         }
         var editor  = document.getElementById("imgEdtr");
-        var jsonPre = document.getElementById("json-data");
+        var jsonPre = document.getElementById("json-frame");
         var imgAm   = document.getElementById("imgAm");
-        var steps   = document.getElementById("step").value;
-        var step    = 50;
+        var xbox    = parseInt(document.getElementById("pos-X"));
+        var ybox    = parseInt(document.getElementById("pos-Y"));
         var lft = 0, tp = 0;
-        var hstep = 234;
-        var frame = 0;
+        var horzPos = xbox > 0 ? xbox :234;
+        var vertPos = ybox > 0 ? ybox :234;
+        var frame = 1;
         var max = 1;
         var poslft = 0;
 
-            document.onkeydown = function(e) {
-
-            console.log(e.keyCode, steps);
+        document.onkeydown = function(e) {
+            var horzStep = parseInt(document.getElementById("horzStep").value);
+            console.log(e.keyCode);
             switch (e.keyCode) {
                 case 37:
-                    lft -= hstep;
+                    lft -= horzPos;
                     ++ frame;
-                    poslft -= step;
+                    poslft -= horzStep;
                     break;
                 case 39:
-                    lft += hstep;
+                    lft += horzPos;
                     ++ frame;
-                    poslft += step;
+                    poslft += horzStep;
                     break;
                 case 38:
-                    -- tp;
+                     tp -= vertPos ;
                     ++ frame;
                     break;
                 case 40:
-                    ++ tp;
+                     tp += vertPos;
                     ++ frame;
                     break;
                 default:
-
             }
             max = Math.max(frame,max)
             if(lft > 1638) lft = 0; frame = 0;
             if(lft < 0 ) lft = 1638; frame = max
             var json = {
+                tag:   document.getElementById("tag-name").value,
                 top:   tp,
                 left:  lft,
                 frame: frame,
-                tag: document.getElementById("tag-name").value
+                horzStep:  horzStep,
+                vertStep:  vertStep,
             }
-            console.log(poslft);
             editor.style.backgroundPosition =`${lft}px ${tp}px`;
             imgAm.style.backgroundPosition =`${lft}px ${tp}px`;
             imgAm.style.left = `${poslft}px`;
+
             document.getElementById("edtrPos").innerHTML =`${lft}px ${tp}px`
-            document.getElementById("json-data").innerHTML = JSON.stringify(json,null,4);
+            document.getElementById("json-frame").innerHTML = JSON.stringify(json,null,4);
         }
 
     </script>
