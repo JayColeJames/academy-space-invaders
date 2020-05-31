@@ -18,7 +18,7 @@
                 <p> image-background position</p>
                 <p>
                     <label for="pos-x">X</label>
-                    <input class="xy-box" id="pos-X" type="number" name="pos-x" value="0">
+                    <input class="xy-box" id="pos-x" type="number" name="pos-x" value="0">
 
                     <label for="pos-y">Y</label>
                     <input class="xy-box" id="pos-y" type="number" name="pos-y" value="0">
@@ -29,13 +29,13 @@
                     <label for="horzStep">Horz. Step</label>
                     <input id="horzStep" type="number" name="horzStep" class="xy-box" value="50">
                     <label for="vertStep">Vert. Step</label>
-                    <input id="vertStep" type="number" name="vertStep" class="xy-box" value="0">
+                    <input id="vertStep" type="number" name="vertStep" class="xy-box" value="1">
                 </p>
                 <hr>
                 <p>
                     Frame Data
                     <label for="frame"> #</label>
-                    <input id="frame" type="number" name="frame" class="xy-box" value="0">
+                    <input id="frame" type="number" name="frame" class="xy-box" value="1">
                 </p>
                 <pre id="json-frame" contenteditable="true"></pre>
                 <button type="button" name="add-btn" onclick="addFrame()">Add</button>
@@ -47,7 +47,11 @@
             <div class="column">
                 <p>Clip Data</p>
                 <pre id="json-clip" contenteditable="true"></pre>
+            <div class="row">
                 <button type="button" name="run-btn" onclick="runClip()">Run</button>
+                <button type="button" name="save-btn" onclick="saveClip()">Save</button>
+                <button type="button" name="load-btn" onclick="loadClip()">Load</button>
+            </div>
             </div>
         </div>
         <div class="animator preview-clip">
@@ -90,36 +94,33 @@
         var editor  = document.getElementById("imgEdtr");
         var jsonPre = document.getElementById("json-frame");
         var imgAm   = document.getElementById("imgAm");
-        var xbox    = parseInt(document.getElementById("pos-X"));
-        var ybox    = parseInt(document.getElementById("pos-Y"));
-        var lft = 0, tp = 0;
-        var horzPos = xbox > 0 ? xbox :234;
-        var vertPos = ybox > 0 ? ybox :234;
-        var frame = 1;
+        var lft = 0, tp = 0, horzPos, vertPos, frameJson, clipJson = [];
         var max = 1;
-        var poslft = 0;
+        var poslft = 0, postop;
 
         document.onkeydown = function(e) {
+            var xbox     = parseInt(document.getElementById("pos-x").value);
+            var ybox     = parseInt(document.getElementById("pos-y").value);
             var horzStep = parseInt(document.getElementById("horzStep").value);
+            var vertStep = parseInt(document.getElementById("vertStep").value);
+            var frame    = parseInt(document.getElementById("frame").value);
+            horzPos = xbox > 0 ? xbox :234;
+            vertPos = ybox > 0 ? ybox :234;
             console.log(e.keyCode);
             switch (e.keyCode) {
                 case 37:
                     lft -= horzPos;
-                    ++ frame;
                     poslft -= horzStep;
                     break;
                 case 39:
                     lft += horzPos;
-                    ++ frame;
                     poslft += horzStep;
                     break;
                 case 38:
-                     tp -= vertPos ;
-                    ++ frame;
+                    tp -= vertPos ;
                     break;
                 case 40:
-                     tp += vertPos;
-                    ++ frame;
+                    tp += vertPos;
                     break;
                 default:
             }
@@ -137,7 +138,6 @@
             editor.style.backgroundPosition =`${lft}px ${tp}px`;
             imgAm.style.backgroundPosition =`${lft}px ${tp}px`;
             imgAm.style.left = `${poslft}px`;
-
             document.getElementById("edtrPos").innerHTML =`${lft}px ${tp}px`
             document.getElementById("json-frame").innerHTML = JSON.stringify(json,null,4);
         }
