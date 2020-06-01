@@ -29,13 +29,14 @@
                     <label for="horzStep">Horz. Step</label>
                     <input id="horzStep" type="number" name="horzStep" class="xy-box" value="50">
                     <label for="vertStep">Vert. Step</label>
-                    <input id="vertStep" type="number" name="vertStep" class="xy-box" value="1">
+                    <input id="vertStep" type="number" name="vertStep" class="xy-box" value="0">
                 </p>
                 <hr>
                 <p>
                     Frame Data
                     <label for="frame"> #</label>
                     <input id="frame" type="number" name="frame" class="xy-box" value="1">
+                    <button type="button" name="remove-btn" onclick="removeFrame()">Remove Frame</button>
                 </p>
                 <pre id="json-frame" contenteditable="true"></pre>
                 <button type="button" name="add-btn" onclick="addFrame()">Add</button>
@@ -49,8 +50,11 @@
                 <pre id="json-clip" contenteditable="true"></pre>
             <div class="row">
                 <button type="button" name="run-btn" onclick="runClip()">Run</button>
+                <button type="button" name="update-btn" onclick="updateClip()">Update</button>
                 <button type="button" name="save-btn" onclick="saveClip()">Save</button>
                 <button type="button" name="load-btn" onclick="loadClip()">Load</button>
+                <button type="button" name="clear-btn" onclick="clearClip()">Clear Clip</button>
+                <button type="button" name="clear-btn" onclick="updateClip()">Clear Clip</button>
             </div>
             </div>
         </div>
@@ -94,7 +98,15 @@
         var editor  = document.getElementById("imgEdtr");
         var jsonPre = document.getElementById("json-frame");
         var imgAm   = document.getElementById("imgAm");
-        var lft = 0, tp = 0, horzPos, vertPos, frameJson, clipJson = [];
+        var picLeft = 0, picTop = 0, horzPos, vertPos, frameJson={};
+        var img = document.getElementById('imgEdtr'),
+        style = img.currentStyle || window.getComputedStyle(img, false),
+        imageUrl = style.backgroundImage.slice(4, -1).replace(/"/g, "");
+        var clipJson ={
+            clipName:"",
+            url:imageUrl,
+            frames:[]
+            };
         var max = 1;
         var poslft = 0, postop;
 
@@ -106,41 +118,75 @@
             var frame    = parseInt(document.getElementById("frame").value);
             horzPos = xbox > 0 ? xbox :234;
             vertPos = ybox > 0 ? ybox :234;
-            console.log(e.keyCode);
+        //    console.log(e.keyCode);
             switch (e.keyCode) {
                 case 37:
-                    lft -= horzPos;
+                    picLeft -= horzPos;
                     poslft -= horzStep;
                     break;
                 case 39:
-                    lft += horzPos;
+                    picLeft += horzPos;
                     poslft += horzStep;
                     break;
                 case 38:
-                    tp -= vertPos ;
+                    picTop -= vertPos ;
                     break;
                 case 40:
-                    tp += vertPos;
+                    picTop += vertPos;
                     break;
                 default:
             }
             max = Math.max(frame,max)
-            if(lft > 1638) lft = 0; frame = 0;
-            if(lft < 0 ) lft = 1638; frame = max
-            var json = {
-                tag:   document.getElementById("tag-name").value,
-                top:   tp,
-                left:  lft,
-                frame: frame,
-                horzStep:  horzStep,
-                vertStep:  vertStep,
+            if(picLeft > 1638) picLeft = 0; frame = 0;
+            if(picLeft < 0 ) picLeft = 1638; frame = max
+            frameJson = {
+                clipName:   document.getElementById("tag-name").value,
+                picTop:   picTop,
+                picLeft:  picLeft,
+                frame:    frame,
+                horzMove: horzStep,
+                vertMove: vertStep,
             }
-            editor.style.backgroundPosition =`${lft}px ${tp}px`;
-            imgAm.style.backgroundPosition =`${lft}px ${tp}px`;
+            editor.style.backgroundPosition =`${picLeft}px ${picTop}px`;
+            imgAm.style.backgroundPosition =`${picLeft}px ${picTop}px`;
             imgAm.style.left = `${poslft}px`;
-            document.getElementById("edtrPos").innerHTML =`${lft}px ${tp}px`
-            document.getElementById("json-frame").innerHTML = JSON.stringify(json,null,4);
+            document.getElementById("edtrPos").innerHTML =`${picLeft}px ${picTop}px`
+            document.getElementById("json-frame").innerHTML = JSON.stringify(frameJson,null,4);
         }
+        function addFrame(){
+            var frame = parseInt(document.getElementById("frame").value);
+            clipJson.clipName = frameJson.clipName;
+            clipJson.frames.push(frameJson);
+            document.getElementById("json-clip").innerHTML = JSON.stringify(clipJson,null,4);
+            ++ frame
+            document.getElementById("frame").value = frame;
+
+        }
+        function removeFrame(){
+            var frame = parseInt(document.getElementById("frame").value);
+            clipJson.frames.splice(frame-1,1);
+        }
+        function updateClip(){
+            console.log("clip Changed");
+            clipJson =JSON.parse(document.getElementById("json-clip").innerHTML);
+            console.log(clipJson);
+        }
+        function runClip(){
+            frames = clipJson.frames
+            var posLeft = 0
+
+            frames.forEach((frame, i) => {
+
+                posleft += frame.horzMove;
+
+                imgAm.style.backgroundPosition =`${frame.picLeft}px ${frame.picTop}px`;
+                imgAm.style.left = `${poslft}px`;
+
+            });
+
+
+        }
+
 
     </script>
 </html>

@@ -42,6 +42,7 @@
 #json-clip{
     min-width: 250px;
     min-height: 80%;
+    height: 375px;
     overflow:scroll;
     background-color: black;
     color: white;
