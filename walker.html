@@ -7,9 +7,10 @@
     </head>
 
     <body>
-        <!-- <div id="demo" class="animator">
-            <p id="image" onmouseover="animateScript2()"> </p>
-        </div> -->
+        <div id="demo" class="animator">
+            <div id="frame-img" class="frame"></div>
+            <p id="image"> </p>
+        </div>
         <div id="editor" class="editor row animator">
             <div class="column">
                     <label for="tag-name">Clip Name</label><br>
@@ -25,6 +26,8 @@
                 </p>
                 <hr>
                 <p>Move Direction</p>
+                <label for="speed">Speed</label>
+                <input id="speed" type="number" name="speed" class="xy-box" value="300">
                 <p>
                     <label for="horzStep">Horz. Step</label>
                     <input id="horzStep" type="number" name="horzStep" class="xy-box" value="50">
@@ -50,11 +53,11 @@
                 <pre id="json-clip" contenteditable="true"></pre>
             <div class="row">
                 <button type="button" name="run-btn" onclick="runClip()">Run</button>
+                <button type="button" name="stop-btn" onclick="stopClip()">Stop</button>
+                <button type="button" name="clear-btn" onclick="clearClip()">Clear Clip</button>
                 <button type="button" name="update-btn" onclick="updateClip()">Update</button>
                 <button type="button" name="save-btn" onclick="saveClip()">Save</button>
                 <button type="button" name="load-btn" onclick="loadClip()">Load</button>
-                <button type="button" name="clear-btn" onclick="clearClip()">Clear Clip</button>
-                <button type="button" name="clear-btn" onclick="updateClip()">Clear Clip</button>
             </div>
             </div>
         </div>
@@ -65,36 +68,36 @@
     </body>
     <script type="text/javascript">
 
-        var  tID; // variable to clear the setInterval()
-        var start = true;
-        function animateScript() {
-            var    position = 256; //start position image slicer
-            const  interval = 300; //600 ms of interval
-            var    frame = 0, offset = 0;
-            var    demo = document.getElementById("demo");
-            var    img = document.getElementById("image");
-            if (start){
-                start = false;
-                tID = setInterval ( () => {
-                    img.style.backgroundPosition =`-${position}px 0px`;
-                    img.style.left = `${offset}px`;
-                    ++ frame
-                    document.getElementById("pos").innerHTML = position+ " frame "+ frame + " offset "+ offset +" "+ demo.width;
-                    if(offset > demo.width) offset = -10;
-                    if (position < 1536) {
-                        position = position + 230;
-                        offset += 10;
-                        if(offset  > 1600)offset = 0;
-                    } //we increment the position by 230 each time
-                    else {
-                        position = 265; //reset to 265px, once position exceeds 1536px
-                        frame = 0
-                        offset += 20;
-                    }
-                }
-                , interval );
-            }
-        }
+        // var  tID; // variable to clear the setInterval()
+        // var start = true;
+        // function animateScript() {
+        //     var    position = 256; //start position image slicer
+        //     const  interval = 300; //600 ms of interval
+        //     var    frame = 0, offset = 0;
+        //     var    demo = document.getElementById("demo");
+        //     var    img = document.getElementById("image");
+        //     if (start){
+        //         start = false;
+        //         tID = setInterval ( () => {
+        //             img.style.backgroundPosition =`-${position}px 0px`;
+        //             img.style.left = `${offset}px`;
+        //             ++ frame
+        //             document.getElementById("pos").innerHTML = position+ " frame "+ frame + " offset "+ offset +" "+ demo.width;
+        //             if(offset > demo.width) offset = -10;
+        //             if (position < 1536) {
+        //                 position = position + 230;
+        //                 offset += 10;
+        //                 if(offset  > 1600)offset = 0;
+        //             } //we increment the position by 230 each time
+        //             else {
+        //                 position = 265; //reset to 265px, once position exceeds 1536px
+        //                 frame = 0
+        //                 offset += 20;
+        //             }
+        //         }
+        //         , interval );
+        //     }
+        // }
         var editor  = document.getElementById("imgEdtr");
         var jsonPre = document.getElementById("json-frame");
         var imgAm   = document.getElementById("imgAm");
@@ -105,7 +108,8 @@
         var clipJson ={
             clipName:"",
             url:imageUrl,
-            frames:[]
+            frames:[],
+            speed:300
             };
         var max = 1;
         var poslft = 0, postop;
@@ -113,12 +117,14 @@
         document.onkeydown = function(e) {
             var xbox     = parseInt(document.getElementById("pos-x").value);
             var ybox     = parseInt(document.getElementById("pos-y").value);
+            var speed    = parseInt(document.getElementById("speed").value);
             var horzStep = parseInt(document.getElementById("horzStep").value);
             var vertStep = parseInt(document.getElementById("vertStep").value);
             var frame    = parseInt(document.getElementById("frame").value);
+            var frameImg = document.getElementById("frame-img");
             horzPos = xbox > 0 ? xbox :234;
             vertPos = ybox > 0 ? ybox :234;
-        //    console.log(e.keyCode);
+            console.log(e.keyCode);
             switch (e.keyCode) {
                 case 37:
                     picLeft -= horzPos;
@@ -134,22 +140,30 @@
                 case 40:
                     picTop += vertPos;
                     break;
+                case 13:
+                    addFrame();
+                    break;
                 default:
             }
             max = Math.max(frame,max)
             if(picLeft > 1638) picLeft = 0; frame = 0;
             if(picLeft < 0 ) picLeft = 1638; frame = max
+
             frameJson = {
                 clipName:   document.getElementById("tag-name").value,
                 picTop:   picTop,
                 picLeft:  picLeft,
                 frame:    frame,
+                speed:    speed,
                 horzMove: horzStep,
                 vertMove: vertStep,
             }
-            editor.style.backgroundPosition =`${picLeft}px ${picTop}px`;
-            imgAm.style.backgroundPosition =`${picLeft}px ${picTop}px`;
+            frameImg.style.left =`${picLeft+30}px`;
+            frameImg.style.top = `${picTop+10}px`;
+            editor.style.backgroundPosition =`-${picLeft}px ${picTop}px`;
+            imgAm.style.backgroundPosition =`-${picLeft}px ${picTop}px`;
             imgAm.style.left = `${poslft}px`;
+
             document.getElementById("edtrPos").innerHTML =`${picLeft}px ${picTop}px`
             document.getElementById("json-frame").innerHTML = JSON.stringify(frameJson,null,4);
         }
@@ -171,22 +185,27 @@
             clipJson =JSON.parse(document.getElementById("json-clip").innerHTML);
             console.log(clipJson);
         }
+        var timerID; // variable to clear the setInterval()
         function runClip(){
+            console.log("run clip");
             frames = clipJson.frames
-            var posLeft = 0
-
-            frames.forEach((frame, i) => {
-
-                posleft += frame.horzMove;
-
-                imgAm.style.backgroundPosition =`${frame.picLeft}px ${frame.picTop}px`;
-                imgAm.style.left = `${poslft}px`;
-
-            });
-
+            var posLeft = 0;
+            var fc = 0
+            timerID = setInterval (()=> {
+                frame = clipJson.frames[fc++];
+                if(frame){
+                    posLeft += frame.horzMove;
+                    imgAm.style.backgroundPosition =`${frame.picLeft}px ${frame.picTop}px`;
+                    imgAm.style.left = `${posLeft}px`;
+                }else{
+                    fc=0;
+                    //clearInterval(timerID)
+                }
+            },300);
 
         }
-
-
+        function stopClip(){
+            clearInterval(timerID)
+        }
     </script>
 </html>
