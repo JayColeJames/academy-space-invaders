@@ -7,58 +7,64 @@
     </head>
 
     <body>
-        <div id="demo" class="animator">
+        <div id="demo" class="animator row">
             <div id="frame-img" class="frame"></div>
             <p id="image"> </p>
-        </div>
-        <div id="editor" class="editor row animator">
-            <div class="column">
+            <div id="editor" class="editor row animator">
+                <div class="column">
                     <label for="tag-name">Clip Name</label><br>
                     <input id="tag-name" type="text" name="tag-name" value="">
 
-                <p> image-background position</p>
-                <p>
-                    <label for="pos-x">X</label>
-                    <input class="xy-box" id="pos-x" type="number" name="pos-x" value="0">
+                    <p> image-background position</p>
+                    <p>
+                        <label for="box-width">Box Width</label>
+                        <input class="xy-box" id="box-width" type="number" name="box-width" value="100">
+                        <label for="box-heigth">Box Heigth</label>
+                        <input class="xy-box" id="box-heigth" type="number" name="box-heigth" value="125">
+                    </p>
+                    <p>
+                        <label for="pos-x">X</label>
+                        <input class="xy-box" id="pos-x" type="number" name="pos-x" value="0">
 
-                    <label for="pos-y">Y</label>
-                    <input class="xy-box" id="pos-y" type="number" name="pos-y" value="0">
-                </p>
-                <hr>
-                <p>Move Direction</p>
-                <label for="speed">Speed</label>
-                <input id="speed" type="number" name="speed" class="xy-box" value="300">
-                <p>
-                    <label for="horzStep">Horz. Step</label>
-                    <input id="horzStep" type="number" name="horzStep" class="xy-box" value="50">
-                    <label for="vertStep">Vert. Step</label>
-                    <input id="vertStep" type="number" name="vertStep" class="xy-box" value="0">
-                </p>
-                <hr>
-                <p>
-                    Frame Data
-                    <label for="frame"> #</label>
-                    <input id="frame" type="number" name="frame" class="xy-box" value="1">
-                    <button type="button" name="remove-btn" onclick="removeFrame()">Remove Frame</button>
-                </p>
-                <pre id="json-frame" contenteditable="true"></pre>
-                <button type="button" name="add-btn" onclick="addFrame()">Add</button>
-            </div>
-            <div class="column animator">
-                <p style="margin-left: 20px;">position <span id="edtrPos">0,0</span></p>
-                <p id="imgEdtr"></p>
-            </div>
-            <div class="column">
-                <p>Clip Data</p>
-                <pre id="json-clip" contenteditable="true"></pre>
-            <div class="row">
-                <button type="button" name="run-btn" onclick="runClip()">Run</button>
-                <button type="button" name="stop-btn" onclick="stopClip()">Stop</button>
-                <button type="button" name="clear-btn" onclick="clearClip()">Clear Clip</button>
-                <button type="button" name="update-btn" onclick="updateClip()">Update</button>
-                <button type="button" name="save-btn" onclick="saveClip()">Save</button>
-                <button type="button" name="load-btn" onclick="loadClip()">Load</button>
-            </div>
+                        <label for="pos-y">Y</label>
+                        <input class="xy-box" id="pos-y" type="number" name="pos-y" value="0">
+                    </p>
+                    <hr>
+                    <p>Move Direction</p>
+                    <label for="speed">Speed</label>
+                    <input id="speed" type="number" name="speed" class="xy-box" value="300">
+                    <p>
+                        <label for="horzStep">Horz. Step</label>
+                        <input id="horzStep" type="number" name="horzStep" class="xy-box" value="50">
+                        <label for="vertStep">Vert. Step</label>
+                        <input id="vertStep" type="number" name="vertStep" class="xy-box" value="0">
+                    </p>
+                    <hr>
+                    <p>
+                        Frame Data
+                        <label for="frame"> #</label>
+                        <input id="frame" type="number" name="frame" class="xy-box" value="1">
+                        <button type="button" name="remove-btn" onclick="removeFrame()">Remove Frame</button>
+                    </p>
+                    <pre id="json-frame" contenteditable="true"></pre>
+                    <button type="button" name="add-btn" onclick="addFrame()">Add</button>
+                </div>
+                <div class="column animator">
+                    <p style="margin-left: 20px;">position <span id="edtrPos">0,0</span></p>
+                    <p id="imgEdtr" class="frame"></p>
+                </div>
+                <div class="column">
+                    <p>Clip Data</p>
+                    <pre id="json-clip" contenteditable="true"></pre>
+                    <div class="row">
+                        <button type="button" name="run-btn" onclick="runClip()">Run</button>
+                        <button type="button" name="stop-btn" onclick="stopClip()">Stop</button>
+                        <button type="button" name="clear-btn" onclick="clearClip()">Clear Clip</button>
+                        <button type="button" name="update-btn" onclick="updateClip()">Update</button>
+                        <button type="button" name="save-btn" onclick="saveClip()">Save</button>
+                        <button type="button" name="load-btn" onclick="loadClip()">Load</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="animator preview-clip">
@@ -102,9 +108,10 @@
         var jsonPre = document.getElementById("json-frame");
         var imgAm   = document.getElementById("imgAm");
         var picLeft = 0, picTop = 0, horzPos, vertPos, frameJson={};
-        var img = document.getElementById('imgEdtr'),
-        style = img.currentStyle || window.getComputedStyle(img, false),
-        imageUrl = style.backgroundImage.slice(4, -1).replace(/"/g, "");
+        var img = document.getElementById('imgEdtr');
+        var image = document.getElementById('image');
+        var style = img.currentStyle || window.getComputedStyle(img, false);
+        var imageUrl = style.backgroundImage.slice(4, -1).replace(/"/g, "");
         var clipJson ={
             clipName:"",
             url:imageUrl,
@@ -115,15 +122,19 @@
         var poslft = 0, postop;
 
         document.onkeydown = function(e) {
-            var xbox     = parseInt(document.getElementById("pos-x").value);
-            var ybox     = parseInt(document.getElementById("pos-y").value);
+            var pic_pos_x = parseInt(document.getElementById("pos-x").value);
+            var pic_pos_y = parseInt(document.getElementById("pos-y").value);
+            var box_width = parseInt(document.getElementById("box-width").value);
+            var box_heigth= parseInt(document.getElementById("box-heigth").value);
             var speed    = parseInt(document.getElementById("speed").value);
             var horzStep = parseInt(document.getElementById("horzStep").value);
             var vertStep = parseInt(document.getElementById("vertStep").value);
             var frame    = parseInt(document.getElementById("frame").value);
             var frameImg = document.getElementById("frame-img");
-            horzPos = xbox > 0 ? xbox :234;
-            vertPos = ybox > 0 ? ybox :234;
+
+            horzPos = pic_pos_x > 0 ? pic_pos_x : box_width;
+            vertPos = pic_pos_y > 0 ? pic_pos_y : box_heigth;
+
             console.log(e.keyCode);
             switch (e.keyCode) {
                 case 37:
@@ -146,8 +157,8 @@
                 default:
             }
             max = Math.max(frame,max)
-            if(picLeft > 1638) picLeft = 0; frame = 0;
-            if(picLeft < 0 ) picLeft = 1638; frame = max
+            if(picLeft > image.width) picLeft = 0;
+            if(picLeft < 0 ) picLeft = image.width -frameImg;
 
             frameJson = {
                 clipName:   document.getElementById("tag-name").value,
@@ -158,8 +169,8 @@
                 horzMove: horzStep,
                 vertMove: vertStep,
             }
-            frameImg.style.left =`${picLeft+30}px`;
-            frameImg.style.top = `${picTop+10}px`;
+            frameImg.style.left =`${picLeft+pic_pos_x}px`;
+            frameImg.style.top = `${picTop+pic_pos_y}px`;
             editor.style.backgroundPosition =`-${picLeft}px ${picTop}px`;
             imgAm.style.backgroundPosition =`-${picLeft}px ${picTop}px`;
             imgAm.style.left = `${poslft}px`;
@@ -187,6 +198,7 @@
         }
         var timerID; // variable to clear the setInterval()
         function runClip(){
+            clearInterval(timerID);
             console.log("run clip");
             frames = clipJson.frames
             var posLeft = 0;
